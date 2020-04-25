@@ -10,7 +10,7 @@ api = Api(app)
 
 # checks incoming data and determines status code
 def checkPostedData(data, funcName):
-    if funcName == 'add' or funcName == 'subtract' or funcName == 'multiply':
+    if funcName == 'add' or funcName == 'subtract':
         if 'x' not in data or 'y' not in data:
             return 301
         else:
@@ -45,8 +45,37 @@ class Add(Resource):
         return jsonify(ret)
 
 
-# you call add resource on your api to match path with class
+class Subtract(Resource):
+    def post(self):
+        # get request body
+        postedData = request.get_json()
+
+        # check the body
+        status_code = checkPostedData(postedData, 'subtract')
+
+        # return if status code is not 200
+        if status_code != 200:
+            ret = {
+                'Message': 'Something went wrong!',
+                'Status Code': status_code
+            }
+            return jsonify(ret)
+
+        # if body is as expected and code is 200, do calculation and respond
+        x = postedData['x']
+        y = postedData['y']
+        x = int(x)
+        y = int(y)
+        ret = {
+            'Message': x - y,
+            'Status Code': 200
+        }
+        return jsonify(ret)
+
+
+# you call resources on your api to match path with class
 api.add_resource(Add, '/add')
+api.add_resource(Subtract, '/subtract')
 
 
 # a route out of resources
