@@ -1,8 +1,26 @@
 from flask import Flask, jsonify, request
 from flask_restful import Api, Resource
+from flask_pymongo import pymongo
 
 # initiate flask
 app = Flask(__name__)
+
+
+# get env vars
+app.config.from_pyfile('settings.py')
+
+
+# initiate mongo client
+client = pymongo.MongoClient(app.config.get("DB_CLIENT"))
+
+
+# get db
+db = client.get_database('restful-python-db')
+
+
+# get db's collections
+user_collection = pymongo.collection.Collection(db, 'users')
+
 
 # initiate restful api
 api = Api(app)
@@ -87,6 +105,15 @@ def root():
     return jsonify(resJ)
 
 
+@app.route("/test_db")
+def test():
+    insertionRes = user_collection.insert_one({"name": "TestUser"})
+    if insertionRes:
+        return 'User inserted!'
+    else:
+        return 'DB may not be working properly'
+
+
 # start the server
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run()
